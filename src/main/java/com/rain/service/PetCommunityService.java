@@ -24,7 +24,7 @@ public class PetCommunityService {
     public void addFoster(FosterPost p) throws SQLException { mapper.addFoster(p); }
     public void updateFoster(FosterPost p) throws SQLException { mapper.updateFoster(p); }
 
-    public List<Hospital> findHospitalByPage(String name, String type, String level, Integer page, Integer size) throws SQLException { return mapper.findHospitalByPage(name, type, level, page, size); }
-    public Integer countHospital(String name, String type, String level) throws SQLException { return mapper.countHospital(name, type, level); }
+    public List<Hospital> findHospitalByPage(String name, String services, String address, Integer page, Integer size) throws SQLException { return mapper.findHospitalByPage(name, services, address, page, size); }
+    public Integer countHospital(String name, String services, String address) throws SQLException { return mapper.countHospital(name, services, address); }
     public Hospital findHospitalById(Integer id) throws SQLException { return mapper.findHospitalById(id); }
 }

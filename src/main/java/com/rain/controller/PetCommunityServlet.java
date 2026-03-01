@@ -75,8 +75,8 @@ public class PetCommunityServlet extends BaseServlet {
         JSONObject p = JSONObject.parseObject(req.getReader().readLine());
         Integer page = p.getIntValue("page"); Integer size = p.getIntValue("size");
         JSONObject data = new JSONObject();
-        data.put("hospitalList", service.findHospitalByPage(p.getString("name"), p.getString("type"), p.getString("level"), page, size));
-        data.put("total", service.countHospital(p.getString("name"), p.getString("type"), p.getString("level")));
+        data.put("hospitalList", service.findHospitalByPage(p.getString("name"), p.getString("services"), p.getString("address"), page, size));
+        data.put("total", service.countHospital(p.getString("name"), p.getString("services"), p.getString("address")));
         writeJson(resp, success(data));
     }
     private void hospitalDetail(HttpServletRequest req, HttpServletResponse resp) throws Exception { JSONObject data=new JSONObject(); data.put("hospital", service.findHospitalById(Integer.parseInt(req.getParameter("id")))); writeJson(resp, success(data)); }
