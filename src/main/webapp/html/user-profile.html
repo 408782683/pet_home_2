@@ -252,7 +252,7 @@
 
       // 设置上传请求头
       setUploadHeaders() {
-        const token = localStorage.getItem('token');
+        const token = localStorage.getItem('authToken');
         if (token) {
           this.uploadHeaders = { Authorization: `Bearer ${token}` };
         } else {
