@@ -56,4 +56,26 @@ public class ReviewMapper {
         }
     }
 
+
+
+    public List<Review> findReviewListByUserId(Integer userId) throws SQLException {
+        String sql = "select * from review where user_id = ? order by create_time desc";
+        try(Connection conn = JdbcUtil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1,userId);
+            ResultSet rs = pstmt.executeQuery();
+            List<Review> list = new ArrayList<>();
+            while (rs.next()) {
+                Review review = new Review();
+                review.setId(rs.getInt("id"));
+                review.setOrderId(rs.getInt("order_id"));
+                review.setUserId(rs.getInt("user_id"));
+                review.setProductId(rs.getInt("product_id"));
+                review.setContent(rs.getString("content"));
+                review.setRating(rs.getInt("rating"));
+                review.setCreateTime(rs.getDate("create_time"));
+                list.add(review);
+            }
+            return list;
+        }
+    }
 }

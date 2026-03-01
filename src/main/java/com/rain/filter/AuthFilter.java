@@ -31,6 +31,9 @@ public class AuthFilter implements Filter {
         }
         // 如果是其他资源来访问
         String authToken = req.getHeader("Authorization");
+        if(authToken != null && authToken.startsWith("Bearer ")){
+            authToken = authToken.substring(7);
+        }
         if(authToken == null){
             JSONObject result = new JSONObject();
             result.put("success",false);

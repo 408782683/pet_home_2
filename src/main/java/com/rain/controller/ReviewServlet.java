@@ -19,6 +19,8 @@ public class ReviewServlet extends BaseServlet{
         if("/findByPid".equals(pathInfo)){
             //根据商品id查询对应的评论数据
             findByPid(req,resp);
+        }else if("/findReviewList".equals(pathInfo)){
+            findReviewList(req,resp);
         }else{
             writeJson(resp,error("接口不存在!!!!"));
         }
@@ -48,4 +50,19 @@ public class ReviewServlet extends BaseServlet{
         }
     }
 
+
+
+    private void findReviewList(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        JSONObject params = JSONObject.parseObject(req.getReader().readLine());
+        Integer userId = params.getIntValue("userId");
+        try {
+            List<Review> reviewList = reviewService.findReviewListByUserId(userId);
+            JSONObject result = new JSONObject();
+            result.put("reviewList",reviewList);
+            writeJson(resp,success(result));
+        } catch (Exception e) {
+            e.printStackTrace();
+            writeJson(resp,error("系统繁忙,请稍后尝试"));
+        }
+    }
 }

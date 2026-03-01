@@ -43,4 +43,9 @@ public class ForumService {
     public boolean checkPostIsLike(Integer pid,Integer userId) throws SQLException {
         return forumMapper.checkPostIsLike(pid, userId);
     }
+
+
+    public void toggleLike(Integer pid,Integer userId,boolean isLiked) throws SQLException {
+        forumMapper.toggleLike(pid,userId,isLiked);
+    }
 }
