@@ -231,4 +231,33 @@ public class ForumMapper {
             return rs.next();
         }
     }
+
+
+    // 点赞或取消点赞
+    public void toggleLike(Integer pid, Integer userId, boolean isLiked) throws SQLException {
+        try (Connection conn = JdbcUtil.getConnection()) {
+            conn.setAutoCommit(false);
+            try {
+                if (isLiked) {
+                    try (PreparedStatement ps = conn.prepareStatement("insert into forum_post_like(post_id,user_id,create_time) values(?,?,now())")) {
+                        ps.setInt(1, pid); ps.setInt(2, userId); ps.executeUpdate();
+                    }
+                    try (PreparedStatement ps = conn.prepareStatement("update forum_post set like_count = like_count + 1 where id=?")) {
+                        ps.setInt(1, pid); ps.executeUpdate();
+                    }
+                } else {
+                    try (PreparedStatement ps = conn.prepareStatement("delete from forum_post_like where post_id=? and user_id=?")) {
+                        ps.setInt(1, pid); ps.setInt(2, userId); ps.executeUpdate();
+                    }
+                    try (PreparedStatement ps = conn.prepareStatement("update forum_post set like_count = if(like_count>0,like_count-1,0) where id=?")) {
+                        ps.setInt(1, pid); ps.executeUpdate();
+                    }
+                }
+                conn.commit();
+            } catch (Exception e) {
+                conn.rollback();
+                throw e;
+            }
+        }
+    }
 }
