@@ -62,4 +62,29 @@ public class CartMapper {
             pstmt.executeUpdate();
         }
     }
+
+
+    // 根据用户id查询购物车列表（包含商品信息）
+    public List<Cart> findCartListByUserId(Integer userId) throws SQLException {
+        String sql = "select c.id,c.product_id,c.user_id,c.quantity,c.create_time,p.name,p.price,p.image from cart c left join product p on c.product_id=p.id where c.user_id=? order by c.create_time desc";
+        try(Connection conn = JdbcUtil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1,userId);
+            ResultSet rs = pstmt.executeQuery();
+            List<Cart> list = new ArrayList<>();
+            while (rs.next()) {
+                Cart cart = new Cart();
+                cart.setId(rs.getInt("id"));
+                cart.setProductId(rs.getInt("product_id"));
+                cart.setUserId(rs.getInt("user_id"));
+                cart.setQuantity(rs.getInt("quantity"));
+                cart.setCreateTime(rs.getTimestamp("create_time").toLocalDateTime());
+                cart.setProductName(rs.getString("name"));
+                cart.setProductPrice(rs.getBigDecimal("price"));
+                cart.setProductImages(rs.getString("image"));
+                list.add(cart);
+            }
+            return list;
+        }
+    }
+
 }

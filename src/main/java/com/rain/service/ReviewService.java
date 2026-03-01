@@ -16,4 +16,9 @@ public class ReviewService {
         return reviewMapper.findCountByPid(pid);
     }
 
+
+
+    public List<Review> findReviewListByUserId(Integer userId) throws SQLException {
+        return reviewMapper.findReviewListByUserId(userId);
+    }
 }
