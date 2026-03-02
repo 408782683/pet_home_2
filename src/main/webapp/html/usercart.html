@@ -283,6 +283,9 @@
                 return this.selectedItems.reduce((total, item) => {
                     return total + (parseFloat(item.productPrice) * item.quantity);
                 }, 0);
+            },
+            authHeader() {
+                return (this.token || '').replace(/^Bearer\s+/i, '');
             }
         },
         created() {
@@ -297,7 +300,7 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': this.token
+                            'Authorization': this.authHeader
                         },
                     });
                     const data = await response.json();
@@ -639,7 +642,7 @@
                         method:"POST",
                         headers:{
                             'Content-Type': 'application/json',
-                            'Authorization': this.token
+                            'Authorization': this.authHeader
                         },
                         body:JSON.stringify(orderData)
                     })
