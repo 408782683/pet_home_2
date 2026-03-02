@@ -3,6 +3,7 @@ package com.rain.controller;
 import com.alibaba.fastjson2.JSONObject;
 import com.rain.entity.Appointment;
 import com.rain.entity.InsuranceClaim;
+import com.rain.entity.InsuranceOrder;
 import com.rain.service.LifeServiceService;
 import com.rain.service.OrderServiceEx;
 import jakarta.servlet.ServletException;
@@ -52,6 +53,8 @@ public class LifeServiceServlet extends BaseServlet {
                 claimList(req, resp);
             } else if (uri.startsWith("/api/insurance") && "/claim/submit".equals(path)) {
                 claimSubmit(req, resp);
+            } else if (uri.startsWith("/api/insurance") && "/purchase".equals(path)) {
+                insurancePurchase(req, resp);
 
             // 商品订单模块
             } else if (uri.startsWith("/api/order") && "/listByPage".equals(path)) {
@@ -231,6 +234,36 @@ public class LifeServiceServlet extends BaseServlet {
 
         service.submitClaim(claim);
         writeJson(resp, success("提交成功"));
+    }
+
+    /** 购买保险 */
+    private void insurancePurchase(HttpServletRequest req, HttpServletResponse resp) throws Exception {
+        JSONObject params = JSONObject.parseObject(req.getReader().readLine());
+        InsuranceOrder order = params.toJavaObject(InsuranceOrder.class);
+
+        if (order.getUserId() == null || order.getInsuranceId() == null || order.getPetName() == null || order.getPetType() == null
+                || order.getPetAge() == null || order.getPayeeName() == null || order.getPayeePhone() == null
+                || order.getPayeeAccount() == null || order.getStartDate() == null) {
+            writeJson(resp, error("参数不完整"));
+            return;
+        }
+
+        String orderNo = "INS" + new SimpleDateFormat("yyyyMMdd").format(new Date()) + (new Random().nextInt(900000) + 100000);
+        order.setOrderNo(orderNo);
+
+        if (order.getStatus() == null || order.getStatus().isEmpty()) {
+            order.setStatus("生效中");
+        }
+
+        Date endDate = new Date(order.getStartDate().getTime());
+        endDate.setYear(endDate.getYear() + 1);
+        endDate.setDate(endDate.getDate() - 1);
+        order.setEndDate(endDate);
+
+        service.submitInsuranceOrder(order);
+        JSONObject data = new JSONObject();
+        data.put("orderNo", orderNo);
+        writeJson(resp, success(data));
     }
 
     /** 分页查询商城订单 */

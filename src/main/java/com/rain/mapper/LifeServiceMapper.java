@@ -386,6 +386,33 @@ public class LifeServiceMapper {
         }
     }
 
+    /** 提交保险订单 */
+    public void submitInsuranceOrder(InsuranceOrder order) throws SQLException {
+        String sql = "insert into insurance_order(" +
+                "order_no, user_id, insurance_id, insurance_name, price, pet_name, pet_type, pet_age, pet_breed, payee_name, payee_phone, payee_account, start_date, end_date, status, create_time" +
+                ") values(?,?,?,?,?,?,?,?,?,?,?,?,?,?,?,now())";
+
+        try (Connection conn = JdbcUtil.getConnection();
+             PreparedStatement ps = conn.prepareStatement(sql)) {
+            ps.setString(1, order.getOrderNo());
+            ps.setInt(2, order.getUserId());
+            ps.setInt(3, order.getInsuranceId());
+            ps.setString(4, order.getInsuranceName());
+            ps.setBigDecimal(5, order.getPrice());
+            ps.setString(6, order.getPetName());
+            ps.setString(7, order.getPetType());
+            ps.setInt(8, order.getPetAge());
+            ps.setString(9, order.getPetBreed());
+            ps.setString(10, order.getPayeeName());
+            ps.setString(11, order.getPayeePhone());
+            ps.setString(12, order.getPayeeAccount());
+            ps.setDate(13, new Date(order.getStartDate().getTime()));
+            ps.setDate(14, new Date(order.getEndDate().getTime()));
+            ps.setString(15, order.getStatus());
+            ps.executeUpdate();
+        }
+    }
+
     /** 映射 insurance 记录到实体 */
     private Insurance mapInsurance(ResultSet rs) throws SQLException {
         Insurance insurance = new Insurance();

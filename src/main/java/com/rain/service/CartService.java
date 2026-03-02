@@ -1,15 +1,10 @@
 package com.rain.service;
 import com.rain.entity.Cart;
-import com.rain.entity.Category;
-import com.rain.entity.Product;
 import com.rain.mapper.CartMapper;
-import com.rain.mapper.CategoryMapper;
-import com.rain.mapper.ProductMapper;
 import java.sql.SQLException;
 import java.util.List;
 public class CartService {
     private CartMapper cartMapper = new CartMapper();
-    private ProductMapper productMapper = new ProductMapper();
 
     //添加购物车
     public void addToCart(Integer productId,Integer userId,Integer quantity) throws SQLException {
@@ -27,5 +22,25 @@ public class CartService {
 
     public List<Cart> findCartListByUserId(Integer userId) throws SQLException {
         return cartMapper.findCartListByUserId(userId);
+    }
+
+    public boolean updateCartQuantityById(Integer id, Integer userId, Integer quantity) throws SQLException {
+        return cartMapper.updateCartQuantityById(id, userId, quantity) > 0;
+    }
+
+    public boolean deleteCartItem(Integer id, Integer userId) throws SQLException {
+        return cartMapper.deleteByIdAndUserId(id, userId) > 0;
+    }
+
+    public int batchDeleteCartItems(List<Integer> ids, Integer userId) throws SQLException {
+        int count = 0;
+        for (Integer id : ids) {
+            count += cartMapper.deleteByIdAndUserId(id, userId);
+        }
+        return count;
+    }
+
+    public int clearCart(Integer userId) throws SQLException {
+        return cartMapper.clearByUserId(userId);
     }
 }
