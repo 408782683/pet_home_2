@@ -294,9 +294,23 @@
         methods: {
 // 加载购物车列表
             async loadCartList() {
+                const userId = this.userInfo && (this.userInfo.id || this.userInfo.userId);
+                if (!userId) {
+                    this.$notify({
+                        title: '提示',
+                        message: '请先登录',
+                        type: 'warning',
+                        duration: 2000
+                    });
+                    setTimeout(() => {
+                        this.goTo('/index.html');
+                    }, 800);
+                    return;
+                }
+
                 this.loading = true;
                 try {
-                    const response = await fetch('/api/cart/findCartList?userId='+this.userInfo.id, {
+                    const response = await fetch('/api/cart/findCartList?userId=' + encodeURIComponent(userId), {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
