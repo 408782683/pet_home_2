@@ -281,7 +281,7 @@
                     });
                     const data = await res.json();
                     if (data.success) {
-                        this.policyList = data.data.orderList || [];
+                        this.policyList = data.data.policyList || [];
                         this.total = data.data.total || 0;
                     } else {
                         this.$message.error(data.message || '加载失败');

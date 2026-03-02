@@ -297,7 +297,7 @@
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': this.token
+                            'Authorization': 'Bearer ' + this.token
                         },
                     });
                     const data = await response.json();
@@ -639,7 +639,7 @@
                         method:"POST",
                         headers:{
                             'Content-Type': 'application/json',
-                            'Authorization': this.token
+                            'Authorization': 'Bearer ' + this.token
                         },
                         body:JSON.stringify(orderData)
                     })
