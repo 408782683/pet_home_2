@@ -269,8 +269,14 @@
                     return;
                 }
 
+                const userId = this.userInfo.id || this.userInfo.userId;
+                if (!userId) {
+                    this.$message.error('用户信息异常，请重新登录');
+                    return;
+                }
+
                 const params = {
-                    userId: this.userInfo.id,
+                    userId: userId,
                     page: this.currentPage,
                     size: this.pageSize
                 };
@@ -286,7 +292,7 @@
                     });
                     const data = await res.json();
                     if (data.success) {
-                        this.policyList = data.data.policyList || [];
+                        this.policyList = (data.data && (data.data.policyList || data.data.orderList)) || [];
                         this.total = data.data.total || 0;
                     } else {
                         this.$message.error(data.message || '加载失败');
