@@ -225,7 +225,7 @@
                   :file-list="fileList"
                   list-type="picture-card"
                   :limit="5"
-                  :headers="{ 'Authorization': 'Bearer ' + this.authToken }"
+                  :headers="{ 'Authorization': authHeader }"
                   :on-exceed="handleExceed">
             <i class="el-icon-plus"></i>
             <div slot="tip" class="el-upload__tip">最多上传5张图片，支持JPG/PNG格式</div>
@@ -302,6 +302,11 @@
         }
       };
     },
+    computed: {
+      authHeader() {
+        return (this.authToken || '').replace(/^Bearer\s+/i, '');
+      }
+    },
     created() {
       this.loadHospitals();
     },
@@ -318,7 +323,7 @@
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': 'Bearer ' + this.authToken
+              'Authorization': this.authHeader
             },
             body: JSON.stringify(params)
           });
@@ -415,7 +420,7 @@
               method: 'POST',
               headers: {
                 'Content-Type': 'application/json',
-                'Authorization': 'Bearer ' + this.authToken
+                'Authorization': this.authHeader
               },
               body: JSON.stringify(payload)
             });

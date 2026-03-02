@@ -208,7 +208,7 @@
                             :before-upload="beforeImageUpload"
                             :limit="5"
                             :file-list="imageFileList"
-                            :headers="{ Authorization: 'Bearer ' + token }">
+                            :headers="{ Authorization: authHeader }">
                         <i class="el-icon-plus"></i>
                         <div slot="tip" class="el-upload__tip">最多上传5张图片，单张图片不超过5MB</div>
                     </el-upload>
@@ -253,6 +253,11 @@
                 imageFileList: []
             };
         },
+        computed: {
+            authHeader() {
+                return (this.token || '').replace(/^Bearer\s+/i, '');
+            }
+        },
         created() {
             this.loadPolicyList();
         },
@@ -275,7 +280,7 @@
                         method: 'POST',
                         body: JSON.stringify(params),
                         headers: {
-                            'Authorization': `Bearer ${this.token}` ,
+                            'Authorization': this.authHeader ,
                             'Content-Type': 'application/json'
                         }
                     });
@@ -372,7 +377,7 @@
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${this.token}`
+                                'Authorization': this.authHeader
                             },
                             body: JSON.stringify(payload)
                         });
