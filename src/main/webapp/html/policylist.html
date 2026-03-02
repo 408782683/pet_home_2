@@ -327,7 +327,12 @@
 
             handleImageSuccess(response, file, fileList) {
                 if (response.success) {
-                    this.claimForm.evidenceImages.push(response.data);
+                    const imageUrl = response.data && response.data.imgUrl ? response.data.imgUrl : response.data;
+                    if (!imageUrl) {
+                        this.$message.error('图片地址解析失败');
+                        return;
+                    }
+                    this.claimForm.evidenceImages.push(imageUrl);
                 } else {
                     this.$message.error('图片上传失败');
                     // 移除失败的文件
@@ -338,7 +343,7 @@
 
             handleImageRemove(file, fileList) {
                 if (file.response && file.response.success) {
-                    const url = file.response.data;
+                    const url = (file.response.data && file.response.data.imgUrl) || file.response.data;
                     const index = this.claimForm.evidenceImages.indexOf(url);
                     if (index !== -1) {
                         this.claimForm.evidenceImages.splice(index, 1);

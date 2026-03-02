@@ -440,8 +440,17 @@
       // 图片上传成功回调
       handleUploadSuccess(response, file, fileList) {
         if (response.success) {
+          const imageUrl = response.data && response.data.imgUrl ? response.data.imgUrl : response.data;
+          if (!imageUrl) {
+            this.$notify.error({
+              title: '错误',
+              message: '图片地址解析失败',
+              duration: 2000
+            });
+            return;
+          }
           this.fileList = fileList;
-          this.imageUrls.push(response.data);
+          this.imageUrls.push(imageUrl);
           this.appointmentForm.images = this.imageUrls.join(',');
           this.$refs.appointmentFormRef && this.$refs.appointmentFormRef.validateField('images');
           this.$notify.success({
@@ -460,7 +469,9 @@
 
       // 移除上传图片
       handleRemove(file, fileList) {
-        const removeUrl = file.response && file.response.success ? file.response.data : file.url;
+        const removeUrl = file.response && file.response.success
+                ? ((file.response.data && file.response.data.imgUrl) || file.response.data)
+                : file.url;
         if (removeUrl) {
           this.imageUrls = this.imageUrls.filter(url => url !== removeUrl);
         }

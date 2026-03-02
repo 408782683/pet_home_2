@@ -52,7 +52,19 @@ public class CartMapper {
         }
     }
 
-//根据id来删除购物车数据
+    // 按购物车ID修改数量
+    public int updateCartQuantityById(Integer id, Integer userId, Integer quantity) throws SQLException {
+        String sql = "update cart set quantity = ? where id = ? and user_id = ?";
+        try (Connection conn = JdbcUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, quantity);
+            pstmt.setInt(2, id);
+            pstmt.setInt(3, userId);
+            return pstmt.executeUpdate();
+        }
+    }
+
+    //根据id来删除购物车数据
     public void deleteById(Integer id,Connection conn) throws SQLException {
         String sql = "delete from cart where id = ?";
         try(PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -60,6 +72,25 @@ public class CartMapper {
             pstmt.setLong(1,id);
             //执行sql
             pstmt.executeUpdate();
+        }
+    }
+
+    public int deleteByIdAndUserId(Integer id, Integer userId) throws SQLException {
+        String sql = "delete from cart where id = ? and user_id = ?";
+        try (Connection conn = JdbcUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            pstmt.setInt(2, userId);
+            return pstmt.executeUpdate();
+        }
+    }
+
+    public int clearByUserId(Integer userId) throws SQLException {
+        String sql = "delete from cart where user_id = ?";
+        try (Connection conn = JdbcUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+            return pstmt.executeUpdate();
         }
     }
 
