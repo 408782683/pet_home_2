@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>跳转中...</title>
+</head>
+<body>
+<script>
+  // 兼容历史错误路径：insuracne-detail.html -> insurance-detail.html
+  const query = window.location.search || '';
+  window.location.replace('/html/insurance-detail.html' + query);
+</script>
+</body>
+</html>
