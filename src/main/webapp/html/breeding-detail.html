@@ -392,7 +392,7 @@
       },
       isMyPost() {
         if (!this.post) return false;
-        const userInfo = JSON.parse(localStorage.getItem('userInfo')) || mockUserInfo;
+        const userInfo = JSON.parse(localStorage.getItem('userInfo')) || this.userInfo || {};
         return userInfo && userInfo.id === this.post.userId;
       }
     },
@@ -401,11 +401,37 @@
     },
     methods: {
       // 加载帖子详情
-      loadPostDetail() {
+      async loadPostDetail() {
         this.loading = true;
-        setTimeout(async() => {
-           //
-        }, 500);
+        try {
+          const urlParams = new URLSearchParams(window.location.search);
+          const id = urlParams.get('id');
+          if (!id) {
+            this.$message.error('缺少帖子ID参数');
+            this.loading = false;
+            return;
+          }
+
+          const response = await fetch(`/api/breeding/detail?id=${id}`, {
+            method: 'POST',
+            headers: {
+              'Authorization': this.token,
+              'Content-Type': 'application/json'
+            }
+          });
+          const data = await response.json();
+          if (data.success) {
+            this.post = data.data.post || {};
+            this.initImages();
+          } else {
+            this.$message.error(data.message || '加载配种详情失败');
+          }
+        } catch (e) {
+          console.error(e);
+          this.$message.error('加载配种详情失败');
+        } finally {
+          this.loading = false;
+        }
       },
       // 初始化图片列表
       initImages() {

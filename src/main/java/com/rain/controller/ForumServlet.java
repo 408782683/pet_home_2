@@ -18,7 +18,7 @@ public class ForumServlet extends BaseServlet {
     ForumService forumService = new ForumService();
 
     @Override
-    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException, IOException {
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
         String path = req.getPathInfo();
         if (path.equals("/findByPage")) {
             //分页查询论坛帖子
@@ -36,6 +36,9 @@ public class ForumServlet extends BaseServlet {
         }
         else if(path.equals("/like/check")){
             checkPostIsLike(req,resp);
+        }
+        else if(path.equals("/like")){
+            toggleLike(req,resp);
         }
         else {
             writeJson(resp, error("接口不存在！"));
@@ -151,4 +154,16 @@ public class ForumServlet extends BaseServlet {
     }
 
 
+
+
+    private void toggleLike(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        JSONObject params = JSONObject.parseObject(req.getReader().readLine());
+        try {
+            forumService.toggleLike(params.getIntValue("postId"), params.getIntValue("userId"), params.getBooleanValue("isLiked"));
+            writeJson(resp, success("操作成功"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            writeJson(resp, error("操作失败"));
+        }
+    }
 }

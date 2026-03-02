@@ -23,4 +23,9 @@ public class CartService {
         }
     }
 
+
+
+    public List<Cart> findCartListByUserId(Integer userId) throws SQLException {
+        return cartMapper.findCartListByUserId(userId);
+    }
 }
