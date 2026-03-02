@@ -52,7 +52,19 @@ public class CartMapper {
         }
     }
 
-//根据id来删除购物车数据
+    // 按购物车ID修改数量
+    public int updateCartQuantityById(Integer id, Integer userId, Integer quantity) throws SQLException {
+        String sql = "update cart set quantity = ? where id = ? and user_id = ?";
+        try (Connection conn = JdbcUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, quantity);
+            pstmt.setInt(2, id);
+            pstmt.setInt(3, userId);
+            return pstmt.executeUpdate();
+        }
+    }
+
+    //根据id来删除购物车数据
     public void deleteById(Integer id,Connection conn) throws SQLException {
         String sql = "delete from cart where id = ?";
         try(PreparedStatement pstmt = conn.prepareStatement(sql)) {
@@ -63,10 +75,29 @@ public class CartMapper {
         }
     }
 
+    public int deleteByIdAndUserId(Integer id, Integer userId) throws SQLException {
+        String sql = "delete from cart where id = ? and user_id = ?";
+        try (Connection conn = JdbcUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, id);
+            pstmt.setInt(2, userId);
+            return pstmt.executeUpdate();
+        }
+    }
+
+    public int clearByUserId(Integer userId) throws SQLException {
+        String sql = "delete from cart where user_id = ?";
+        try (Connection conn = JdbcUtil.getConnection();
+             PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.setInt(1, userId);
+            return pstmt.executeUpdate();
+        }
+    }
+
 
     // 根据用户id查询购物车列表（包含商品信息）
     public List<Cart> findCartListByUserId(Integer userId) throws SQLException {
-        String sql = "select c.id,c.product_id,c.user_id,c.quantity,c.create_time,p.name,p.price,p.image from cart c left join product p on c.product_id=p.id where c.user_id=? order by c.create_time desc";
+        String sql = "select c.id,c.product_id,c.user_id,c.quantity,c.create_time,p.name,p.price,p.images as product_images from cart c left join product p on c.product_id=p.id where c.user_id=? order by c.create_time desc";
         try(Connection conn = JdbcUtil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1,userId);
             ResultSet rs = pstmt.executeQuery();
@@ -80,7 +111,7 @@ public class CartMapper {
                 cart.setCreateTime(rs.getTimestamp("create_time").toLocalDateTime());
                 cart.setProductName(rs.getString("name"));
                 cart.setProductPrice(rs.getBigDecimal("price"));
-                cart.setProductImages(rs.getString("image"));
+                cart.setProductImages(rs.getString("product_images"));
                 list.add(cart);
             }
             return list;

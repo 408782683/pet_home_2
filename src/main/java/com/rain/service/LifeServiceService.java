@@ -4,6 +4,7 @@ import com.rain.entity.Appointment;
 import com.rain.entity.Insurance;
 import com.rain.entity.InsuranceClaim;
 import com.rain.entity.InsuranceOrder;
+import com.rain.entity.InsuranceOrder;
 import com.rain.mapper.LifeServiceMapper;
 
 import java.sql.SQLException;
@@ -92,5 +93,9 @@ public class LifeServiceService {
 
     public void submitClaim(InsuranceClaim claim) throws SQLException {
         mapper.submitClaim(claim);
+    }
+
+    public void submitInsuranceOrder(InsuranceOrder order) throws SQLException {
+        mapper.submitInsuranceOrder(order);
     }
 }

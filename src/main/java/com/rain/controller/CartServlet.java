@@ -23,6 +23,14 @@ public class CartServlet extends BaseServlet{
         }else if("/findCartList".equals(pathInfo)){
             // 根据用户id加载对应的购物车数据
            findCartList(req,resp);
+        }else if("/updateQuantity".equals(pathInfo)){
+            updateQuantity(req, resp);
+        }else if("/deleteItem".equals(pathInfo)){
+            deleteItem(req, resp);
+        }else if("/batchDelete".equals(pathInfo)){
+            batchDelete(req, resp);
+        }else if("/clear".equals(pathInfo)){
+            clear(req, resp);
         }else{
             writeJson(resp,error("接口不存在!!!"));
         }
@@ -50,7 +58,20 @@ public class CartServlet extends BaseServlet{
 
 
     private void findCartList(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Integer userId = Integer.parseInt(req.getParameter("userId"));
+        String userIdStr = req.getParameter("userId");
+        if (userIdStr == null || userIdStr.trim().isEmpty()) {
+            writeJson(resp, error("缺少用户ID"));
+            return;
+        }
+
+        Integer userId;
+        try {
+            userId = Integer.parseInt(userIdStr);
+        } catch (NumberFormatException e) {
+            writeJson(resp, error("用户ID格式错误"));
+            return;
+        }
+
         try {
             List<Cart> cartList = cartService.findCartListByUserId(userId);
             JSONObject result = new JSONObject();
@@ -59,6 +80,79 @@ public class CartServlet extends BaseServlet{
         } catch (Exception e) {
             e.printStackTrace();
             writeJson(resp,error("查询购物车失败"));
+        }
+    }
+
+    private void updateQuantity(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        JSONObject params = JSONObject.parseObject(req.getReader().readLine());
+        Integer id = params.getInteger("id");
+        Integer userId = params.getInteger("userId");
+        Integer quantity = params.getInteger("quantity");
+
+        if (id == null || userId == null || quantity == null || quantity < 1) {
+            writeJson(resp, error("参数错误"));
+            return;
+        }
+
+        try {
+            boolean ok = cartService.updateCartQuantityById(id, userId, quantity);
+            writeJson(resp, ok ? success("更新成功") : error("未找到购物车记录"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            writeJson(resp, error("更新失败"));
+        }
+    }
+
+    private void deleteItem(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        JSONObject params = JSONObject.parseObject(req.getReader().readLine());
+        Integer id = params.getInteger("id");
+        Integer userId = params.getInteger("userId");
+        if (id == null || userId == null) {
+            writeJson(resp, error("参数错误"));
+            return;
+        }
+
+        try {
+            boolean ok = cartService.deleteCartItem(id, userId);
+            writeJson(resp, ok ? success("删除成功") : error("未找到购物车记录"));
+        } catch (Exception e) {
+            e.printStackTrace();
+            writeJson(resp, error("删除失败"));
+        }
+    }
+
+    private void batchDelete(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        JSONObject params = JSONObject.parseObject(req.getReader().readLine());
+        List<Integer> ids = params.getList("ids", Integer.class);
+        Integer userId = params.getInteger("userId");
+        if (ids == null || ids.isEmpty() || userId == null) {
+            writeJson(resp, error("参数错误"));
+            return;
+        }
+
+        try {
+            int count = cartService.batchDeleteCartItems(ids, userId);
+            writeJson(resp, success(count));
+        } catch (Exception e) {
+            e.printStackTrace();
+            writeJson(resp, error("批量删除失败"));
+        }
+    }
+
+    private void clear(HttpServletRequest req, HttpServletResponse resp) throws IOException {
+        JSONObject params = JSONObject.parseObject(req.getReader().readLine());
+        Integer userId = params.getInteger("userId");
+        if (userId == null) {
+            writeJson(resp, error("参数错误"));
+            return;
+        }
+
+        try {
+            int count = cartService.clearCart(userId);
+            writeJson(resp, success(count));
+        } catch (Exception e) {
+            e.printStackTrace();
+            writeJson(resp, error("清空失败"));
         }
     }
 }
