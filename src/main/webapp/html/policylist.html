@@ -208,7 +208,7 @@
                             :before-upload="beforeImageUpload"
                             :limit="5"
                             :file-list="imageFileList"
-                            :headers="{ Authorization: 'Bearer ' + token }">
+                            :headers="{ Authorization: authHeader }">
                         <i class="el-icon-plus"></i>
                         <div slot="tip" class="el-upload__tip">最多上传5张图片，单张图片不超过5MB</div>
                     </el-upload>
@@ -253,6 +253,11 @@
                 imageFileList: []
             };
         },
+        computed: {
+            authHeader() {
+                return (this.token || '').replace(/^Bearer\s+/i, '');
+            }
+        },
         created() {
             this.loadPolicyList();
         },
@@ -275,13 +280,13 @@
                         method: 'POST',
                         body: JSON.stringify(params),
                         headers: {
-                            'Authorization': `Bearer ${this.token}` ,
+                            'Authorization': this.authHeader ,
                             'Content-Type': 'application/json'
                         }
                     });
                     const data = await res.json();
                     if (data.success) {
-                        this.policyList = data.data.orderList || [];
+                        this.policyList = data.data.policyList || [];
                         this.total = data.data.total || 0;
                     } else {
                         this.$message.error(data.message || '加载失败');
@@ -322,7 +327,12 @@
 
             handleImageSuccess(response, file, fileList) {
                 if (response.success) {
-                    this.claimForm.evidenceImages.push(response.data);
+                    const imageUrl = response.data && response.data.imgUrl ? response.data.imgUrl : response.data;
+                    if (!imageUrl) {
+                        this.$message.error('图片地址解析失败');
+                        return;
+                    }
+                    this.claimForm.evidenceImages.push(imageUrl);
                 } else {
                     this.$message.error('图片上传失败');
                     // 移除失败的文件
@@ -333,7 +343,7 @@
 
             handleImageRemove(file, fileList) {
                 if (file.response && file.response.success) {
-                    const url = file.response.data;
+                    const url = (file.response.data && file.response.data.imgUrl) || file.response.data;
                     const index = this.claimForm.evidenceImages.indexOf(url);
                     if (index !== -1) {
                         this.claimForm.evidenceImages.splice(index, 1);
@@ -372,7 +382,7 @@
                             method: 'POST',
                             headers: {
                                 'Content-Type': 'application/json',
-                                'Authorization': `Bearer ${this.token}`
+                                'Authorization': this.authHeader
                             },
                             body: JSON.stringify(payload)
                         });
