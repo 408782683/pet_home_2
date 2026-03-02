@@ -243,6 +243,11 @@
     created() {
       this.loadReviewList();
     },
+    computed: {
+      authHeader() {
+        return (this.token || '').replace(/^Bearer\s+/i, '');
+      }
+    },
     methods: {
       // 加载评价列表
       async loadReviewList() {
@@ -257,7 +262,7 @@
             method: 'POST',
             headers: {
               'Content-Type': 'application/json',
-              'Authorization': `Bearer ${this.token}`
+              'Authorization': this.authHeader
             },
             body: JSON.stringify(params)
           });
@@ -304,16 +309,38 @@
 
       // 提交修改
       submitEditReview() {
-        this.$refs.editForm.validate(valid => {
+        this.$refs.editForm.validate(async valid => {
           if (valid) {
-            // 模拟更新
-            const index = this.reviewList.findIndex(r => r.id === this.editForm.reviewId);
-            if (index !== -1) {
-              this.reviewList[index].rating = this.editForm.rating;
-              this.reviewList[index].content = this.editForm.content;
+            const payload = {
+              id: this.editForm.reviewId,
+              userId: this.userInfo.id || this.userInfo.userId,
+              rating: this.editForm.rating,
+              content: this.editForm.content
+            };
+            try {
+              const response = await fetch('/api/review/update', {
+                method: 'POST',
+                headers: {
+                  'Content-Type': 'application/json',
+                  'Authorization': this.authHeader
+                },
+                body: JSON.stringify(payload)
+              });
+              const data = await response.json();
+              if (!data.success) {
+                this.$message.error(data.message || '评价修改失败');
+                return;
+              }
+              const index = this.reviewList.findIndex(r => r.id === this.editForm.reviewId);
+              if (index !== -1) {
+                this.reviewList[index].rating = this.editForm.rating;
+                this.reviewList[index].content = this.editForm.content;
+              }
+              this.$message.success('评价修改成功');
+              this.editDialogVisible = false;
+            } catch (e) {
+              this.$message.error('评价修改失败，请稍后重试');
             }
-            this.$message.success('评价修改成功');
-            this.editDialogVisible = false;
           }
         });
       },
@@ -325,9 +352,24 @@
           cancelButtonText: '取消',
           type: 'warning'
         }).then(() => {
-          this.reviewList = this.reviewList.filter(r => r.id !== id);
-          this.total = this.reviewList.length;
-          this.$message.success('评价已删除');
+          fetch('/api/review/delete', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': this.authHeader
+            },
+            body: JSON.stringify({ id: id, userId: this.userInfo.id || this.userInfo.userId })
+          }).then(res => res.json()).then(data => {
+            if (data.success) {
+              this.reviewList = this.reviewList.filter(r => r.id !== id);
+              this.total = this.reviewList.length;
+              this.$message.success('评价已删除');
+            } else {
+              this.$message.error(data.message || '删除失败');
+            }
+          }).catch(() => {
+            this.$message.error('删除失败，请稍后重试');
+          });
         }).catch(() => {});
       },
 

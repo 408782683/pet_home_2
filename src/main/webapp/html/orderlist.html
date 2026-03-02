@@ -349,6 +349,11 @@
         created() {
             this.loadOrderList();
         },
+        computed: {
+            authHeader() {
+                return (this.token || '').replace(/^Bearer\s+/i, '');
+            }
+        },
         methods: {
             async loadOrderList() {
                 const params = {
@@ -362,7 +367,7 @@
                     const res = await fetch(`/api/order/listByPage`, {
                         method: 'POST',
                         headers: {
-                            'Authorization': `Bearer ${this.token}`,
+                            'Authorization': this.authHeader,
                             'Content-Type': 'application/json'
                         },
                         body: JSON.stringify(params)
@@ -414,7 +419,12 @@
             },
             handleReviewOrder(order) {
                 this.currentOrderId = order.id;
-                this.currentOrderProducts = order.details.map(d => ({
+                const detailList = order.orderDetails || order.details || [];
+                if (!detailList.length) {
+                    this.$message.warning('该订单暂无可评价商品');
+                    return;
+                }
+                this.currentOrderProducts = detailList.map(d => ({
                     ...d,
                     reviewed: false // 实际应调用 checkReviewed API
                 }));
@@ -432,11 +442,37 @@
                     this.$message.warning('请选择商品');
                     return;
                 }
-                this.$refs.reviewForm.validate(valid => {
+                this.$refs.reviewForm.validate(async valid => {
                     if (valid) {
-                        this.$message.success('评价成功！');
-                        this.reviewDialogVisible = false;
-                        this.resetReviewForm();
+                        const payload = {
+                            userId: this.userInfo.id || this.userInfo.userId,
+                            orderId: this.currentOrderId,
+                            productId: this.selectedProductId,
+                            rating: this.reviewForm.rating,
+                            content: this.reviewForm.content
+                        };
+                        try {
+                            const res = await fetch('/api/review/add', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                    'Authorization': this.authHeader
+                                },
+                                body: JSON.stringify(payload)
+                            });
+                            const data = await res.json();
+                            if (data.success) {
+                                const product = this.currentOrderProducts.find(p => p.productId === this.selectedProductId);
+                                if (product) product.reviewed = true;
+                                this.$message.success('评价成功！');
+                                this.reviewDialogVisible = false;
+                                this.resetReviewForm();
+                            } else {
+                                this.$message.error(data.message || '评价失败');
+                            }
+                        } catch (e) {
+                            this.$message.error('评价失败，请稍后重试');
+                        }
                     }
                 });
             },
