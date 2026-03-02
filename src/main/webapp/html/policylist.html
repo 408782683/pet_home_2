@@ -378,6 +378,8 @@
                     const payload = {
                         userId: this.userInfo.id,
                         orderId: this.selectedPolicy.id,
+                        insuranceName: this.selectedPolicy.insuranceName,
+                        petName: this.selectedPolicy.petName,
                         reason: this.claimForm.reason,
                         description: this.claimForm.description,
                         evidenceImages: this.claimForm.evidenceImages.join(',')
