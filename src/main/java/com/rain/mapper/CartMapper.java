@@ -104,7 +104,7 @@ public class CartMapper {
             List<Cart> list = new ArrayList<>();
             while (rs.next()) {
                 Cart cart = new Cart();
-                cart.setId(rs.getInt("id"));
+                cart.setId((long) rs.getInt("id"));
                 cart.setProductId(rs.getInt("product_id"));
                 cart.setUserId(rs.getInt("user_id"));
                 cart.setQuantity(rs.getInt("quantity"));
