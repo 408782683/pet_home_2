@@ -21,4 +21,20 @@ public class ReviewService {
     public List<Review> findReviewListByUserId(Integer userId) throws SQLException {
         return reviewMapper.findReviewListByUserId(userId);
     }
+
+    public boolean existsByUserOrderProduct(Integer userId, Integer orderId, Integer productId) throws SQLException {
+        return reviewMapper.existsByUserOrderProduct(userId, orderId, productId);
+    }
+
+    public void addReview(Review review) throws SQLException {
+        reviewMapper.addReview(review);
+    }
+
+    public boolean updateReview(Review review) throws SQLException {
+        return reviewMapper.updateReview(review) > 0;
+    }
+
+    public boolean deleteReview(Integer id, Integer userId) throws SQLException {
+        return reviewMapper.deleteReview(id, userId) > 0;
+    }
 }

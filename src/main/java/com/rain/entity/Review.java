@@ -46,6 +46,15 @@ public class Review {
      */
     private Date createTime;
 
+    // 非表字段：商品名称
+    private String productName;
+
+    // 非表字段：商品图片
+    private String productImage;
+
+    // 非表字段：订单编号
+    private String orderNo;
+
     // 构造方法
     public Review() {
     }
@@ -108,6 +117,30 @@ public class Review {
         this.createTime = createTime;
     }
 
+    public String getProductName() {
+        return productName;
+    }
+
+    public void setProductName(String productName) {
+        this.productName = productName;
+    }
+
+    public String getProductImage() {
+        return productImage;
+    }
+
+    public void setProductImage(String productImage) {
+        this.productImage = productImage;
+    }
+
+    public String getOrderNo() {
+        return orderNo;
+    }
+
+    public void setOrderNo(String orderNo) {
+        this.orderNo = orderNo;
+    }
+
     @Override
     public String toString() {
         return "Review{" +
@@ -121,4 +154,3 @@ public class Review {
                 '}';
     }
 }
-
