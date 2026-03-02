@@ -283,6 +283,9 @@
                 return this.selectedItems.reduce((total, item) => {
                     return total + (parseFloat(item.productPrice) * item.quantity);
                 }, 0);
+            },
+            authHeader() {
+                return (this.token || '').replace(/^Bearer\s+/i, '');
             }
         },
         created() {
@@ -291,13 +294,27 @@
         methods: {
 // 加载购物车列表
             async loadCartList() {
+                const userId = this.userInfo && (this.userInfo.id || this.userInfo.userId);
+                if (!userId) {
+                    this.$notify({
+                        title: '提示',
+                        message: '请先登录',
+                        type: 'warning',
+                        duration: 2000
+                    });
+                    setTimeout(() => {
+                        this.goTo('/index.html');
+                    }, 800);
+                    return;
+                }
+
                 this.loading = true;
                 try {
-                    const response = await fetch('/api/cart/findCartList?userId='+this.userInfo.id, {
+                    const response = await fetch('/api/cart/findCartList?userId=' + encodeURIComponent(userId), {
                         method: 'POST',
                         headers: {
                             'Content-Type': 'application/json',
-                            'Authorization': this.token
+                            'Authorization': this.authHeader
                         },
                     });
                     const data = await response.json();
@@ -401,8 +418,17 @@
                 }
 
                 try {
-                    const response = await api.updateCartQuantity(row.id, quantity);
-                    if (response.data.success) {
+                    const userId = this.userInfo && (this.userInfo.id || this.userInfo.userId);
+                    const response = await fetch('/api/cart/updateQuantity', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                            'Authorization': this.authHeader
+                        },
+                        body: JSON.stringify({ id: row.id, userId: userId, quantity: quantity })
+                    });
+                    const result = await response.json();
+                    if (result.success) {
                         this.$notify({
                             title: '成功',
                             message: '数量已更新',
@@ -413,7 +439,7 @@
                     } else {
                         this.$notify({
                             title: '失败',
-                            message: response.data.message || '更新失败',
+                            message: result.message || '更新失败',
                             type: 'error',
                             duration: 2000
                         });
@@ -439,8 +465,17 @@
                 }).then(async () => {
                     try {
                         const userInfo = JSON.parse(localStorage.getItem('userInfo')) || this.userInfo;
-                        const response = await api.deleteCartItem(row.id, userInfo.id);
-                        if (response.data.success) {
+                        const userId = userInfo.id || userInfo.userId;
+                        const response = await fetch('/api/cart/deleteItem', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': this.authHeader
+                            },
+                            body: JSON.stringify({ id: row.id, userId: userId })
+                        });
+                        const result = await response.json();
+                        if (result.success) {
                             this.$notify({
                                 title: '成功',
                                 message: '删除成功',
@@ -451,7 +486,7 @@
                         } else {
                             this.$notify({
                                 title: '失败',
-                                message: response.data.message || '删除失败',
+                                message: result.message || '删除失败',
                                 type: 'error',
                                 duration: 2000
                             });
@@ -487,9 +522,18 @@
                 }).then(async () => {
                     try {
                         const userInfo = JSON.parse(localStorage.getItem('userInfo')) || this.userInfo;
+                        const userId = userInfo.id || userInfo.userId;
                         const ids = this.selectedItems.map(item => item.id);
-                        const response = await api.batchDeleteCartItems(ids, userInfo.id);
-                        if (response.data.success) {
+                        const response = await fetch('/api/cart/batchDelete', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': this.authHeader
+                            },
+                            body: JSON.stringify({ ids: ids, userId: userId })
+                        });
+                        const result = await response.json();
+                        if (result.success) {
                             this.$notify({
                                 title: '成功',
                                 message: '删除成功',
@@ -500,7 +544,7 @@
                         } else {
                             this.$notify({
                                 title: '失败',
-                                message: response.data.message || '删除失败',
+                                message: result.message || '删除失败',
                                 type: 'error',
                                 duration: 2000
                             });
@@ -526,8 +570,17 @@
                 }).then(async () => {
                     try {
                         const userInfo = JSON.parse(localStorage.getItem('userInfo')) || this.userInfo;
-                        const response = await api.clearCart(userInfo.id);
-                        if (response.data.success) {
+                        const userId = userInfo.id || userInfo.userId;
+                        const response = await fetch('/api/cart/clear', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': this.authHeader
+                            },
+                            body: JSON.stringify({ userId: userId })
+                        });
+                        const result = await response.json();
+                        if (result.success) {
                             this.$notify({
                                 title: '成功',
                                 message: '购物车已清空',
@@ -538,7 +591,7 @@
                         } else {
                             this.$notify({
                                 title: '失败',
-                                message: response.data.message || '清空失败',
+                                message: result.message || '清空失败',
                                 type: 'error',
                                 duration: 2000
                             });
@@ -639,7 +692,7 @@
                         method:"POST",
                         headers:{
                             'Content-Type': 'application/json',
-                            'Authorization': this.token
+                            'Authorization': this.authHeader
                         },
                         body:JSON.stringify(orderData)
                     })
