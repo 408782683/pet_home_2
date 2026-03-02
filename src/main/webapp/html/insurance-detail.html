@@ -356,6 +356,11 @@
             this.loadUserInfo();
             this.loadInsuranceDetail();
         },
+        computed: {
+            authHeader() {
+                return (this.authToken || '').replace(/^Bearer\s+/i, '');
+            }
+        },
         methods: {
             loadUserInfo() {
                 const userStr = localStorage.getItem('userInfo');
@@ -380,7 +385,7 @@
                     const response = await fetch(`/api/insurance/detail?id=${id}`, {
                         method: 'POST',
                         headers: {
-                            'Authorization': this.authToken,
+                            'Authorization': this.authHeader,
                             'Content-Type': 'application/json'
                         }
                     });
@@ -429,9 +434,57 @@
             },
             // 确认购买
             confirmPurchase() {
-                this.$refs.purchaseForm.validate((valid) => {
-                    if (valid) {
-                       // 提交购买请求
+                this.$refs.purchaseForm.validate(async (valid) => {
+                    if (!valid) return;
+
+                    if (!this.insurance || !this.insurance.id) {
+                        this.$message.error('保险信息无效');
+                        return;
+                    }
+
+                    const userId = this.userInfo && (this.userInfo.id || this.userInfo.userId);
+                    if (!userId) {
+                        this.$message.warning('请先登录');
+                        return;
+                    }
+
+                    const payload = {
+                        userId: userId,
+                        insuranceId: this.insurance.id,
+                        insuranceName: this.insurance.name,
+                        price: this.insurance.price,
+                        petName: this.purchaseForm.petName,
+                        petType: this.purchaseForm.petType,
+                        petAge: this.purchaseForm.petAge,
+                        petBreed: this.purchaseForm.petBreed,
+                        payeeName: this.purchaseForm.payeeName,
+                        payeePhone: this.purchaseForm.payeePhone,
+                        payeeAccount: this.purchaseForm.payeeAccount,
+                        startDate: this.purchaseForm.startDate,
+                        status: '生效中'
+                    };
+
+                    try {
+                        const res = await fetch('/api/insurance/purchase', {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                                'Authorization': this.authHeader
+                            },
+                            body: JSON.stringify(payload)
+                        });
+                        const result = await res.json();
+                        if (result.success) {
+                            this.$message.success('购买成功');
+                            this.purchaseDialogVisible = false;
+                            setTimeout(() => {
+                                window.location.href = '/html/policylist.html';
+                            }, 600);
+                        } else {
+                            this.$message.error(result.message || '购买失败');
+                        }
+                    } catch (e) {
+                        this.$message.error('购买失败，请稍后重试');
                     }
                 });
             },

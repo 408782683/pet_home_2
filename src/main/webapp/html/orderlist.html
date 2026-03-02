@@ -414,7 +414,12 @@
             },
             handleReviewOrder(order) {
                 this.currentOrderId = order.id;
-                this.currentOrderProducts = order.details.map(d => ({
+                const detailList = order.orderDetails || order.details || [];
+                if (!detailList.length) {
+                    this.$message.warning('该订单暂无可评价商品');
+                    return;
+                }
+                this.currentOrderProducts = detailList.map(d => ({
                     ...d,
                     reviewed: false // 实际应调用 checkReviewed API
                 }));
