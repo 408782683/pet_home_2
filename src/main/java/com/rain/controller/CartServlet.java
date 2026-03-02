@@ -50,7 +50,20 @@ public class CartServlet extends BaseServlet{
 
 
     private void findCartList(HttpServletRequest req, HttpServletResponse resp) throws IOException {
-        Integer userId = Integer.parseInt(req.getParameter("userId"));
+        String userIdStr = req.getParameter("userId");
+        if (userIdStr == null || userIdStr.trim().isEmpty()) {
+            writeJson(resp, error("缺少用户ID"));
+            return;
+        }
+
+        Integer userId;
+        try {
+            userId = Integer.parseInt(userIdStr);
+        } catch (NumberFormatException e) {
+            writeJson(resp, error("用户ID格式错误"));
+            return;
+        }
+
         try {
             List<Cart> cartList = cartService.findCartListByUserId(userId);
             JSONObject result = new JSONObject();
