@@ -66,7 +66,7 @@ public class CartMapper {
 
     // 根据用户id查询购物车列表（包含商品信息）
     public List<Cart> findCartListByUserId(Integer userId) throws SQLException {
-        String sql = "select c.id,c.product_id,c.user_id,c.quantity,c.create_time,p.name,p.price,p.image from cart c left join product p on c.product_id=p.id where c.user_id=? order by c.create_time desc";
+        String sql = "select c.id,c.product_id,c.user_id,c.quantity,c.create_time,p.name,p.price,p.images as product_images from cart c left join product p on c.product_id=p.id where c.user_id=? order by c.create_time desc";
         try(Connection conn = JdbcUtil.getConnection(); PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setInt(1,userId);
             ResultSet rs = pstmt.executeQuery();
@@ -80,7 +80,7 @@ public class CartMapper {
                 cart.setCreateTime(rs.getTimestamp("create_time").toLocalDateTime());
                 cart.setProductName(rs.getString("name"));
                 cart.setProductPrice(rs.getBigDecimal("price"));
-                cart.setProductImages(rs.getString("image"));
+                cart.setProductImages(rs.getString("product_images"));
                 list.add(cart);
             }
             return list;
